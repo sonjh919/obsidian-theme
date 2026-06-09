@@ -414,9 +414,7 @@ options:
 
 **사용자가 "네" 선택 시**:
 
-`~/.claude/skills/obsidian-theme/edit-flow.md` 를 Read 한 뒤 **Step 2-B (카테고리 메뉴 모드) 로 바로 진입**. 즉 `AskUserQuestion` 으로 4 큰 카테고리 (🎨 글자·색 / 📝 블록 / 🖼 UI 크롬 / 🔧 레이아웃·기타) 부터 묻는다. 평탄한 25 카테고리 목록을 채팅으로 늘어놓지 말 것 — 사용자가 뭘 먼저 만져야 할지 모름.
-
-선택 → sub 카테고리 (4 옵션) → 그 카테고리의 변수 표 + 자연어 입력 흐름. 자세한 흐름은 `edit-flow.md` 의 2-B-1, 2-B-2, 2-B-3 참조.
+`~/.claude/skills/obsidian-theme/edit-flow.md` 를 Read 한 뒤 Step 2 진입. edit-flow Step 2 는 진입 경로 무관하게 동일 흐름 (`AskUserQuestion` 4 큰 카테고리 + Other → sub 메뉴 → 변수 표 + 자연어 입력).
 
 **"아니오" 선택 시**:
 
