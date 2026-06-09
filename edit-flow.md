@@ -54,11 +54,17 @@ Settings → Appearance → CSS snippets → "obsidian-theme-override" 토글 ON
 이후 변경은 자동 반영.
 ```
 
-## Step 2: 수정 위치 자연어 수집
+## Step 2: 수정 위치 입력 — 진입 경로별 default
 
-사용자가 자연어로 변경을 요청하거나, **카테고리 메뉴 모드** 로 변수 목록부터 보고 결정할 수 있다.
+| 진입 경로 | 기본 모드 |
+|---|---|
+| `/obsidian-theme → 수정` 직접 호출 | **2-A 자연어** default (사용자가 만질 변수를 이미 알고 있을 가능성 ↑) |
+| `create-flow.md` Step 8 디테일링 → 진입 | **2-B 카테고리 메뉴** default (사용자가 뭘 만질지 모르는 상황) |
+| 사용자가 "뭘 만질 수 있어?", "카테고리 보여줘", "메뉴" 같은 표현 사용 | **2-B 카테고리 메뉴** |
 
-### 2-A. 자연어 모드 (default)
+사용자는 언제든 2-A ↔ 2-B 전환 가능 ("카테고리로 보여줘" / "그냥 자연어로 할게").
+
+### 2-A. 자연어 모드
 
 ```
 어디를 어떻게 바꿀까요?
@@ -72,51 +78,81 @@ Settings → Appearance → CSS snippets → "obsidian-theme-override" 토글 ON
 
 여러 변경을 한 번에 받을 수 있음. 한 번에 처리한다.
 
-### 2-B. 카테고리 메뉴 모드 (디테일링 진입 시)
+### 2-B. 카테고리 메뉴 모드 — 2단 `AskUserQuestion` (디테일링 진입 시 default)
 
-사용자가 어떤 변수를 만질지 모를 때, 또는 `create-flow.md` Step 8 에서 디테일링 진입한 직후, 카테고리 메뉴를 보여줄 수 있다.
+사용자가 어떤 변수를 만질지 모를 때, 또는 `create-flow.md` Step 8 에서 디테일링 진입한 직후. 25개 평탄 메뉴는 인지부담 ↑ — **4 큰 카테고리로 묶어서 2단으로 좁혀간다**.
 
-사용자가 카테고리 단위로 묻는 표현 ("헤딩 보여줘", "콜아웃 변수 알려줘", "코드 변수 다 보여줘") 또는 디테일링 첫 진입 시:
+#### 2-B-1. 큰 카테고리 선택 — `AskUserQuestion` (필수)
 
 ```
-어떤 영역을 만져볼까요? `variables.md` 의 카테고리 인덱스 참고.
-
-🎨 색 / 텍스트
-- text         (본문·부제·강조)
-- accent       (액센트 HSL)
-- background   (배경·표면·보더)
-- highlight    (==마크다운 하이라이트==)
-
-📝 본문 요소
-- headings     (h1~h6 각 색·크기·굵기)
-- inline-title (노트 제목)
-- blockquote   (인용)
-- callout      (콜아웃 + 14 타입별 색)
-- code         (코드블록 + 11 syntax)
-- link         (해결/미해결/외부 + hover)
-- tag          (태그 글자·배경·모서리)
-- table        (헤더·교대 행·경계)
-- list         (bullet · 들여쓰기 · 체크박스)
-
-🖼 UI 크롬
-- tabs         (활성 탭·컨테이너·구분선)
-- ribbon       (좌측 아이콘 바)
-- titlebar     (윈도우 상단)
-- statusbar    (윈도우 하단)
-- sidebar-nav  (파일 항목 색·hover·선택)
-- modal        (모달·다이얼로그·팝오버)
-
-🔧 기타
-- typography   (폰트·크기·굵기·줄간격)
-- radius       (모서리)
-- spacing      (간격)
-- canvas       (캔버스 카드 색)
-- graph        (그래프 노드·연결선)
-
-어떤 영역을 보여드릴까요? 카테고리 이름을 말하면 그 영역의 변수 목록 + 현재 값을 보여드릴게요. 또는 그냥 자연어로 "X 를 Y 처럼" 라고 해도 돼요.
+question: "어떤 영역을 만져볼까요?"
+header: "디테일 영역"
+multiSelect: false
+options:
+  - label: "🎨 글자·색"
+    description: "본문·부제·헤딩 h1~h6·링크·태그·강조·하이라이트·액센트"
+  - label: "📝 블록 요소"
+    description: "콜아웃 14타입·코드 syntax 11종·표·리스트·인용·임베드"
+  - label: "🖼 UI 크롬"
+    description: "탭·리본·타이틀바·상태바·사이드바 nav·모달·팝오버"
+  - label: "🔧 레이아웃·기타"
+    description: "폰트·줄간격·모서리·간격·캔버스·그래프·properties"
 ```
 
-사용자가 카테고리를 고르면 `variables.md` 의 해당 섹션을 읽고 변수 + 현재 테마의 실제 값을 표로 보여줌. 그 다음 사용자가 어느 변수를 어떻게 바꿀지 결정.
+#### 2-B-2. 카테고리 안 sub 항목 — `AskUserQuestion` (옵션 ≤ 4) 또는 텍스트 메뉴 (≥ 5)
+
+사용자 선택에 따라 다음 sub-메뉴를 보여준다. 각 sub-카테고리의 변수 표는 `variables.md` 의 해당 섹션 Read 후 첨부.
+
+**🎨 글자·색 선택 시** (옵션 4개 — `AskUserQuestion`):
+```
+options:
+  - "본문 텍스트"       (--text-normal · --text-muted · --text-faint · --bold-color · --italic-color)
+  - "헤딩 h1~h6"        (--h1-color~--h6-color · 크기·굵기·폰트)
+  - "링크·태그"          (--link-color · --link-external-color · --tag-color · --tag-background)
+  - "액센트·하이라이트"   (--accent-h/s/l · --text-highlight-bg)
+```
+
+**📝 블록 요소 선택 시** (옵션 4개 — `AskUserQuestion`):
+```
+options:
+  - "콜아웃"   (--callout-* 일반 + 14 타입별 색)
+  - "코드"     (--code-background + 11 syntax 색)
+  - "표"       (--table-header-background · --table-row-alt-background 등)
+  - "리스트·인용·기타"  (--list-marker-color · --blockquote-* · --hr-color · --embed-*)
+```
+
+**🖼 UI 크롬 선택 시** (옵션 4개 — `AskUserQuestion`):
+```
+options:
+  - "탭·리본"      (--tab-* · --ribbon-*)
+  - "타이틀바·상태바"   (--titlebar-* · --status-bar-*)
+  - "사이드바 nav"       (--nav-item-* · --nav-heading-*)
+  - "모달·팝오버"     (--modal-* · --popover-* · --dialog-* · --prompt-*)
+```
+
+**🔧 레이아웃·기타 선택 시** (옵션 4개 — `AskUserQuestion`):
+```
+options:
+  - "폰트·타이포"    (--font-text-theme · --font-text-size · --line-height-* · --bold-modifier)
+  - "모서리·간격"    (--radius-* · --size-*)
+  - "캔버스·그래프"   (--canvas-* · --graph-*)
+  - "Properties·기타"  (--metadata-* · --file-line-width · --divider-*)
+```
+
+#### 2-B-3. sub 카테고리 안 변수 표 출력 + 자연어 입력
+
+sub 카테고리 선택 후 `variables.md` 의 해당 섹션을 Read 하여 변수 표 (변수명 + 현재 값 + 설명) 를 출력. 그 다음 채팅으로:
+
+```
+이 영역에서 뭘 바꿀까요? 자연어로 알려주세요.
+예: "h1 만 액센트 색으로", "코드 키워드를 보라색으로", "탭 모서리 좀 더 둥글게"
+```
+
+사용자 답변을 받으면 Step 3 (변수 식별) → Step 4 (diff 승인) → Step 5 (적용) 진행.
+
+#### 자유 입력으로 바로 진입
+
+사용자가 디테일링 시작부터 변수가 명확하면 (예: "h1 색을 액센트로 바꿔줘") 2-B-1 의 큰 카테고리 메뉴 건너뛰고 Step 3 로 바로. 즉 2-B 메뉴는 *모르는 사용자용 가이드*, 아는 사용자는 자유 입력.
 
 ## Step 3: 변수 식별 (variables.md 참조)
 
