@@ -46,18 +46,20 @@
 
 ## Step 2.5: 옵시디언 미리보기 노트 자동 생성
 
-hex 6자리는 시각적으로 판단 어려움. 후보 제시와 동시에 vault 안에 미리보기 노트를 생성하여 옵시디언에서 색을 직접 보게 한다.
+hex 6자리·폰트 이름은 텍스트만으로 판단 어려움. 팔레트 후보 3개와 폰트 후보 4개를 한 노트에 넣어 옵시디언에서 시각적으로 비교하게 한다 (Step 3 의 폰트 선택까지 같이 처리).
 
 ### 2.5-1. 노트 작성
 
-Write 도구로 `$VAULT/_palette-preview.md` 생성 (기존 파일 있으면 덮어쓰기). 내용은 후보 3개의 4색을 옵시디언 inline HTML 로 표시:
+Write 도구로 `$VAULT/_theme-preview.md` 생성 (기존 파일 있으면 덮어쓰기). 팔레트 + 폰트 두 섹션:
 
 ```markdown
-# 팔레트 미리보기
+# 테마 미리보기
 
 > 이 노트는 obsidian-theme 스킬이 자동 생성합니다. 다음 호출 시 덮어씁니다.
 
-## [1] warm-cafe ☕ (따뜻한 카페, 종이책)
+## 🎨 팔레트 후보
+
+### [1] warm-cafe ☕ (따뜻한 카페, 종이책)
 
 <div style="display:flex; gap:8px; padding:12px 0;">
 <div style="background:#f7f1e8; padding:28px 36px; color:#3d2f24; border-radius:8px; font-family:monospace; font-size:13px;">배경<br>#f7f1e8</div>
@@ -66,24 +68,61 @@ Write 도구로 `$VAULT/_palette-preview.md` 생성 (기존 파일 있으면 덮
 <div style="background:#c97b3b; padding:28px 36px; color:#ffffff; border-radius:8px; font-family:monospace; font-size:13px;">액센트<br>#c97b3b</div>
 </div>
 
-## [2] sunset-warm 🌅 (석양, 따뜻한 다크)
+### [2] sunset-warm 🌅 (석양, 따뜻한 다크)
 
 <div style="display:flex; gap:8px; padding:12px 0;">
 <div style="background:#1f1410; padding:28px 36px; color:#f4d4b1; border-radius:8px; font-family:monospace; font-size:13px;">배경<br>#1f1410</div>
 ...
 </div>
 
-## [3] (즉석) — "<사용자 묘사>"
+### [3] (즉석) — "<사용자 묘사>"
 
 <div style="display:flex; gap:8px; padding:12px 0;">
 ...
 </div>
+
+---
+
+## 🔤 폰트 후보
+
+샘플: `The quick brown fox jumps over the lazy dog. 따뜻한 카페에서 책을 읽는다. 0123456789`
+
+### [1] 시스템 기본
+
+<p style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 17px; line-height: 1.6;">
+The quick brown fox jumps over the lazy dog.<br>
+따뜻한 카페에서 책을 읽는다. 0123456789
+</p>
+
+### [2] Sans (Inter)
+
+<p style="font-family: 'Inter', -apple-system, sans-serif; font-size: 17px; line-height: 1.6;">
+The quick brown fox jumps over the lazy dog.<br>
+따뜻한 카페에서 책을 읽는다. 0123456789
+</p>
+
+### [3] Serif (Crimson Pro · 글쓰기용)
+
+<p style="font-family: 'Crimson Pro', Georgia, serif; font-size: 18px; line-height: 1.6;">
+The quick brown fox jumps over the lazy dog.<br>
+따뜻한 카페에서 책을 읽는다. 0123456789
+</p>
+
+### [4] Mono 강조 (JetBrains Mono · 본문도 모노)
+
+<p style="font-family: 'JetBrains Mono', Menlo, Consolas, monospace; font-size: 15px; line-height: 1.6;">
+The quick brown fox jumps over the lazy dog.<br>
+따뜻한 카페에서 책을 읽는다. 0123456789
+</p>
+
+> 시스템에 해당 폰트가 없으면 fallback 으로 렌더됩니다 (Inter → 시스템 산세리프, Crimson Pro → Georgia, JetBrains Mono → Menlo/Consolas). 그래도 대략 분위기는 비슷.
 ```
 
 **규칙**:
 - 노트 첫 줄에 "스킬 자동 생성, 다음 호출 시 덮어씁니다" 메모 (사용자 혼란 방지)
-- 각 후보의 텍스트 색은 배경 위에서 읽히도록 자동 선택 (배경 명도 < 50% 면 밝은 텍스트, 아니면 어두운 텍스트)
+- 팔레트 각 후보의 텍스트 색은 배경 위에서 읽히도록 자동 선택 (배경 명도 < 50% 면 밝은 텍스트, 아니면 어두운 텍스트)
 - 액센트는 흰 텍스트 (`#ffffff`) 가 보통 안전
+- 폰트 샘플은 영문·한글·숫자 모두 포함 (실제 사용 패턴 반영)
 
 ### 2.5-2. 옵시디언에서 자동 열기
 
@@ -91,7 +130,7 @@ Write 도구로 `$VAULT/_palette-preview.md` 생성 (기존 파일 있으면 덮
 
 ```bash
 command -v obsidian >/dev/null 2>&1 && \
-  obsidian open path="_palette-preview.md" 2>/dev/null | grep -v "Loading\|installer\|out of date"
+  obsidian open path="_theme-preview.md" 2>/dev/null | grep -v "Loading\|installer\|out of date"
 ```
 
 ### 2.5-3. 사용자 안내
@@ -99,31 +138,31 @@ command -v obsidian >/dev/null 2>&1 && \
 미리보기 노트 안내 메시지 추가:
 
 ```
-🎨 옵시디언에 "_palette-preview.md" 노트를 만들었어요. 새 탭에서 색 비교 후 선택해주세요.
+🎨 옵시디언에 "_theme-preview.md" 노트를 만들었어요. 새 탭에서 색 비교 후 선택해주세요.
 ```
 
 obsidian-cli 가 없거나 활성 vault 가 달라서 자동 열기 실패하면:
 
 ```
-🎨 vault 루트에 "_palette-preview.md" 를 만들었어요. 옵시디언에서 직접 열어주세요.
+🎨 vault 루트에 "_theme-preview.md" 를 만들었어요. 옵시디언에서 직접 열어주세요.
 ```
 
-사용자가 선택을 마치면 노트는 그대로 둔다 (사용자가 다시 볼 수 있도록). 다음 호출 시 덮어씀. 영구 삭제 원하면 사용자가 직접 `rm $VAULT/_palette-preview.md`.
+사용자가 선택을 마치면 노트는 그대로 둔다 (사용자가 다시 볼 수 있도록). 다음 호출 시 덮어씀. 영구 삭제 원하면 사용자가 직접 `rm $VAULT/_theme-preview.md`.
 
 ## Step 3: 구체화 질문 4개
 
-팔레트 확정 후 한 번에 모두 질문 (피로감 ↓):
+팔레트 확정 후 한 번에 모두 질문 (피로감 ↓). Q2 (폰트) 는 Step 2.5 의 미리보기 노트 🔤 섹션 참고 안내:
 
 ```
-네 가지만 더 정해주세요.
+네 가지만 더 정해주세요. (폰트는 _theme-preview.md 의 🔤 섹션에서 실제로 보면서 고르세요)
 
 Q1. 라이트 / 다크 / 둘 다
-Q2. 폰트 — 시스템 기본 / Sans (Inter 류) / Serif (글쓰기용) / Mono 강조
-Q3. 모서리 — 0px (날카로움) / 6px (부드러움) / 12px (둥글둥글)
+Q2. 폰트 — [1] 시스템 / [2] Sans (Inter) / [3] Serif (Crimson Pro) / [4] Mono (JetBrains)
+Q3. 모서리 — 0px (날카로움) / 8px (부드러움) / 12px (둥글) / 16px (매우 둥글)
 Q4. 간격 — 빽빽 / 보통 / 여유
 ```
 
-사용자 답변 수집. 답을 안 한 항목은 기본값 (둘 다 / 시스템 / 6px / 보통) 으로 가정하고 명시.
+사용자 답변 수집. 답을 안 한 항목은 기본값 (둘 다 / 시스템 / 8px / 보통) 으로 가정하고 명시.
 
 ## Step 4: 테마 이름 결정
 
