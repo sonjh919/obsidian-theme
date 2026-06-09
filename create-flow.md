@@ -44,6 +44,72 @@
 
 사용자가 "1번 베이스, 액센트만 더 진한 갈색" 같은 미세 조정을 요청하면 그 부분만 hex 수정 후 최종 팔레트 확정.
 
+## Step 2.5: 옵시디언 미리보기 노트 자동 생성
+
+hex 6자리는 시각적으로 판단 어려움. 후보 제시와 동시에 vault 안에 미리보기 노트를 생성하여 옵시디언에서 색을 직접 보게 한다.
+
+### 2.5-1. 노트 작성
+
+Write 도구로 `$VAULT/_palette-preview.md` 생성 (기존 파일 있으면 덮어쓰기). 내용은 후보 3개의 4색을 옵시디언 inline HTML 로 표시:
+
+```markdown
+# 팔레트 미리보기
+
+> 이 노트는 obsidian-theme 스킬이 자동 생성합니다. 다음 호출 시 덮어씁니다.
+
+## [1] warm-cafe ☕ (따뜻한 카페, 종이책)
+
+<div style="display:flex; gap:8px; padding:12px 0;">
+<div style="background:#f7f1e8; padding:28px 36px; color:#3d2f24; border-radius:8px; font-family:monospace; font-size:13px;">배경<br>#f7f1e8</div>
+<div style="background:#eee5d5; padding:28px 36px; color:#3d2f24; border-radius:8px; font-family:monospace; font-size:13px;">표면<br>#eee5d5</div>
+<div style="background:#3d2f24; padding:28px 36px; color:#f7f1e8; border-radius:8px; font-family:monospace; font-size:13px;">텍스트<br>#3d2f24</div>
+<div style="background:#c97b3b; padding:28px 36px; color:#ffffff; border-radius:8px; font-family:monospace; font-size:13px;">액센트<br>#c97b3b</div>
+</div>
+
+## [2] sunset-warm 🌅 (석양, 따뜻한 다크)
+
+<div style="display:flex; gap:8px; padding:12px 0;">
+<div style="background:#1f1410; padding:28px 36px; color:#f4d4b1; border-radius:8px; font-family:monospace; font-size:13px;">배경<br>#1f1410</div>
+...
+</div>
+
+## [3] (즉석) — "<사용자 묘사>"
+
+<div style="display:flex; gap:8px; padding:12px 0;">
+...
+</div>
+```
+
+**규칙**:
+- 노트 첫 줄에 "스킬 자동 생성, 다음 호출 시 덮어씁니다" 메모 (사용자 혼란 방지)
+- 각 후보의 텍스트 색은 배경 위에서 읽히도록 자동 선택 (배경 명도 < 50% 면 밝은 텍스트, 아니면 어두운 텍스트)
+- 액센트는 흰 텍스트 (`#ffffff`) 가 보통 안전
+
+### 2.5-2. 옵시디언에서 자동 열기
+
+`obsidian-cli` 가 설치되어 있고 활성 vault 가 `$VAULT` 면 자동 열기:
+
+```bash
+command -v obsidian >/dev/null 2>&1 && \
+  obsidian open path="_palette-preview.md" 2>/dev/null | grep -v "Loading\|installer\|out of date"
+```
+
+### 2.5-3. 사용자 안내
+
+미리보기 노트 안내 메시지 추가:
+
+```
+🎨 옵시디언에 "_palette-preview.md" 노트를 만들었어요. 새 탭에서 색 비교 후 선택해주세요.
+```
+
+obsidian-cli 가 없거나 활성 vault 가 달라서 자동 열기 실패하면:
+
+```
+🎨 vault 루트에 "_palette-preview.md" 를 만들었어요. 옵시디언에서 직접 열어주세요.
+```
+
+사용자가 선택을 마치면 노트는 그대로 둔다 (사용자가 다시 볼 수 있도록). 다음 호출 시 덮어씀. 영구 삭제 원하면 사용자가 직접 `rm $VAULT/_palette-preview.md`.
+
 ## Step 3: 구체화 질문 4개
 
 팔레트 확정 후 한 번에 모두 질문 (피로감 ↓):
