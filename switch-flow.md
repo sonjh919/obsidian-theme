@@ -39,17 +39,30 @@ done
 - `theme.css` 첫 줄에 `/* obsidian-theme: managed */` marker 있으면 `(이 스킬 만든)`, 없으면 `(외부)`
 - 번호 `[0]` 으로 옵시디언 기본 테마 (`cssTheme: ""`) 도 선택지에 포함
 
-## Step 2: 사용자 선택
+## Step 2: 사용자 선택 — `AskUserQuestion` (테마 ≤ 4개일 때) / 채팅 텍스트 (≥ 5개)
 
-사용자가 번호 또는 이름으로 답.
+**테마 + "옵시디언 기본" 합쳐 4개 이하**: `AskUserQuestion` 도구 사용 (필수). 각 option label 에 테마 이름, description 에 `(현재)·(이 스킬 만든)·(외부)` 표시.
 
-- 현재 활성 테마를 다시 선택했으면:
-  ```
-  이미 "warm-cafe" 가 적용 중이에요. 다른 거 선택해주세요.
-  ```
-  Step 1 로 돌아가 다시 받기.
+```
+question: "어느 테마로 갈아끼울까요?"
+header: "테마 전환"
+multiSelect: false
+options:
+  - label: "warm-cafe"
+    description: "(현재) (이 스킬 만든)"
+  - label: "nordic-cold"
+    description: "(이 스킬 만든)"
+  - label: "AnuPpuccin"
+    description: "(외부)"
+  - label: "옵시디언 기본 테마"
+    description: "디폴트 (cssTheme: \"\")"
+```
 
-- `[0]` 옵시디언 기본 테마를 선택했으면 `$TARGET = ""` (빈 문자열)
+**테마 5개 이상**: `AskUserQuestion` 4 옵션 한도 초과. 채팅 텍스트 번호 메뉴로 fallback (Step 1 의 텍스트 출력 그대로). 사용자가 번호 또는 이름으로 답.
+
+처리:
+- 현재 활성 테마 다시 선택 시 → "이미 적용 중" 안내 후 Step 1 로 돌아가 다시 받기
+- "옵시디언 기본" 선택 시 → `$TARGET = ""` (빈 문자열)
 - 그 외 → `$TARGET = "<선택한 테마 이름>"`
 
 ## Step 3: 적용 + 보고

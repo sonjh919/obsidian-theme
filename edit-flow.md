@@ -148,9 +148,9 @@ Settings → Appearance → CSS snippets → "obsidian-theme-override" 토글 ON
 - 사용자가 hex 를 직접 줬으면 그대로
 - 자연어 ("어둡게", "주황으로") 면 현재 값에서 추론 (어둡게 = 명도 -15%, 밝게 = +15%, 주황 = hue 25 부근 등)
 
-## Step 4: diff 미리보기
+## Step 4: diff 미리보기 → `AskUserQuestion` 으로 승인 (필수)
 
-변경 전/후 표 제시:
+채팅에 변경 전/후 표 출력:
 
 ```
 변경 사항 미리보기:
@@ -158,11 +158,22 @@ Settings → Appearance → CSS snippets → "obsidian-theme-override" 토글 ON
 변수                   |  현재         |  변경 후
 --code-background      |  #ebe1cb     |  #c9bc9e
 --link-color           |  #c97b3b     |  #ff7f3f
-
-적용할까요? (Y/n)
 ```
 
-사용자 승인 후 다음 Step. 거절하면 Step 2 로 돌아가 다시 수집.
+그 다음 `AskUserQuestion` 호출 (필수, "Y/n" 텍스트 X):
+
+```
+question: "이렇게 적용할까요?"
+header: "diff 승인"
+multiSelect: false
+options:
+  - label: "네, 적용"
+    description: "위 변경사항 모두 반영 → 옵시디언 hot reload"
+  - label: "아니요, 다시"
+    description: "Step 2 로 돌아가 다시 수정 요청"
+```
+
+거절하면 Step 2 로 돌아가 다시 수집.
 
 ## Step 5: 적용 + 보고
 

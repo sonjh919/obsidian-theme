@@ -29,27 +29,30 @@
 1. **카탈로그 후보 2개**: 묘사 키워드와 가장 가까운 무드 2개 선택 (palettes.md 의 "무드 키워드 → 후보 매핑 가이드" 참조)
 2. **즉석 생성 1개**: 카탈로그에 없는 새 팔레트 1개 (palettes.md 의 "즉석 생성 가이드" 따름)
 
-### 2-A. 채팅 텍스트 출력
+### 2-A. 팔레트 선택 — `AskUserQuestion` 도구 사용 (필수)
 
-사용자에게 표 형태로 제시:
+사용자에게 채팅으로 짧은 안내 한 줄 출력:
 
 ```
-세 가지 팔레트 후보예요. 어느 게 가장 가까워요?
-(옵시디언에 미리보기 노트 _theme-preview.md 도 띄웠어요. 거기서 실제 색 보면서 선택하세요.)
-
-[1] warm-cafe ☕  (따뜻한 카페, 종이책)
-    배경 #f7f1e8 · 표면 #eee5d5 · 텍스트 #3d2f24 · 액센트 #c97b3b
-
-[2] sunset-warm 🌅  (석양, 따뜻한 다크)
-    배경 #1f1410 · 표면 #2d1f17 · 텍스트 #f4d4b1 · 액센트 #ff8847
-
-[3] (즉석)  (당신 묘사 기반)
-    배경 #faf3e7 · 표면 #f0e5cf · 텍스트 #2a1f15 · 액센트 #d4925c
-
-선택: 1 / 2 / 3 / 다른 거 (말로 조정)
+세 가지 팔레트 후보예요. 옵시디언에 미리보기 노트 _theme-preview.md 도 띄웠으니 거기서 실제 색 보면서 선택하세요.
 ```
 
-사용자가 "1번 베이스, 액센트만 더 진한 갈색" 같은 미세 조정을 요청하면 그 부분만 hex 수정 후 최종 팔레트 확정.
+그 다음 `AskUserQuestion` 도구 호출:
+
+```
+question: "어느 팔레트가 가장 가까워요? (실제 색은 _theme-preview.md 에서 확인)"
+header: "팔레트"
+multiSelect: false
+options:
+  - label: "warm-cafe ☕"
+    description: "따뜻한 카페·종이책. 배경 #f7f1e8 · 액센트 #c97b3b"
+  - label: "sunset-warm 🌅"
+    description: "석양·따뜻한 다크. 배경 #1f1410 · 액센트 #ff8847"
+  - label: "(즉석) <묘사 기반 이름>"
+    description: "당신 묘사로 즉석 생성. 배경 #faf3e7 · 액센트 #d4925c"
+```
+
+사용자가 "Other" 로 미세 조정 요청 시 (예: "1번 베이스에 액센트만 더 진한 갈색") → 그 hex 수정 후 최종 팔레트 확정.
 
 ### 2-B. 옵시디언 미리보기 노트 — **필수** (이 단계 생략 시 사용자가 색 판단 불가)
 
@@ -161,20 +164,48 @@ command -v obsidian >/dev/null 2>&1 && \
 
 사용자가 선택을 마치면 노트는 그대로 둔다 (사용자가 다시 볼 수 있도록). 다음 호출 시 덮어씀. 영구 삭제 원하면 사용자가 직접 `rm $VAULT/_theme-preview.md`.
 
-## Step 3: 구체화 질문 4개
+## Step 3: 구체화 4 질문 — `AskUserQuestion` (multi-question 한 번에) 도구 사용 (필수)
 
-팔레트 확정 후 한 번에 모두 질문 (피로감 ↓). Q2 (폰트) 는 Step 2.5 의 미리보기 노트 🔤 섹션 참고 안내:
+팔레트 확정 후 4개 질문을 *AskUserQuestion 한 번 호출에 다 담아서* 한 화면에 띄운다. 채팅 텍스트로 "Q1, Q2..." 묻지 말 것.
 
+채팅에 짧은 안내 한 줄:
 ```
-네 가지만 더 정해주세요. (폰트는 _theme-preview.md 의 🔤 섹션에서 실제로 보면서 고르세요)
-
-Q1. 라이트 / 다크 / 둘 다
-Q2. 폰트 — [1] 시스템 / [2] Sans (Inter) / [3] Serif (Crimson Pro) / [4] Mono (JetBrains)
-Q3. 모서리 — 0px (날카로움) / 8px (부드러움) / 12px (둥글) / 16px (매우 둥글)
-Q4. 간격 — 빽빽 / 보통 / 여유
+네 가지만 더 정해주세요. 폰트는 _theme-preview.md 의 🔤 섹션에서 실제로 보면서 고르세요.
 ```
 
-사용자 답변 수집. 답을 안 한 항목은 기본값 (둘 다 / 시스템 / 8px / 보통) 으로 가정하고 명시.
+그 다음 `AskUserQuestion` (questions 배열에 4개 묶어서) 호출:
+
+```
+[Q1]
+question: "라이트 / 다크?"
+header: "모드"
+multiSelect: false
+options: 라이트 / 다크 / 둘 다
+
+[Q2]
+question: "본문 폰트?"
+header: "폰트"
+multiSelect: false
+options:
+  - 시스템 기본
+  - Sans (Inter)
+  - Serif (Crimson Pro · 글쓰기용)
+  - Mono 강조 (JetBrains Mono · 본문도 모노)
+
+[Q3]
+question: "모서리 둥글기?"
+header: "모서리"
+multiSelect: false
+options: 0px (날카로움) / 8px (부드러움) / 12px (둥글) / 16px (매우 둥글)
+
+[Q4]
+question: "간격?"
+header: "간격"
+multiSelect: false
+options: 빽빽 / 보통 / 여유
+```
+
+답을 안 한 항목은 기본값 (둘 다 / 시스템 / 8px / 보통) 으로 가정하고 명시.
 
 ## Step 4: 테마 이름 결정
 
@@ -289,14 +320,17 @@ Write 도구로 `$VAULT/.obsidian/themes/$THEME_NAME/manifest.json`:
 }
 ```
 
-## Step 6: 활성화
-
-사용자에게 확인:
+## Step 6: 활성화 — `AskUserQuestion` 사용 (필수)
 
 ```
-방금 만든 "warm-cafe" 테마를 지금 적용할까요? (Y/n)
-- 예: appearance.json 패치 → 옵시디언이 켜져 있으면 즉시 hot reload
-- 아니오: 옵시디언 Settings → Appearance → Themes 에서 직접 선택
+question: "방금 만든 \"warm-cafe\" 테마를 지금 적용할까요?"
+header: "활성화"
+multiSelect: false
+options:
+  - label: "네, 지금 적용"
+    description: "appearance.json 패치 → 옵시디언이 켜져 있으면 즉시 hot reload"
+  - label: "아니요, 나중에 직접"
+    description: "옵시디언 Settings → Appearance → Themes 에서 직접 선택"
 ```
 
 승인하면 `$VAULT/.obsidian/appearance.json` 의 `cssTheme` 필드를 패치한다.
@@ -331,27 +365,26 @@ vault 에 이전 테마가 있었다면 추가 안내:
 
 기본 4질문 (라이트/다크, 폰트, 모서리, 간격) 으로 만든 테마는 옵시디언 자동 파생으로 80% 정도 어울리게 적용됨. 하지만 더 세밀한 영역 (h1~h6 색·굵기, 콜아웃 타입별 색, 코드 syntax, 리스트 marker, 표 헤더, 사이드바 nav 등) 은 직접 지정해야 함.
 
-사용자에게 묻기:
+채팅으로 디테일링 옵션 예시 짧게 안내:
 
 ```
-지금 테마는 기본만 정해진 상태예요. 더 세밀하게 만져볼까요?
+지금 테마는 기본만 정해진 상태예요. 더 세밀하게 만질 수 있는 영역:
+- 헤딩 (h1~h6) · 강조 (bold · italic · ==highlight==) · 링크 디테일
+- 코드 syntax 11종 · 콜아웃 14타입별 색 · 표 · 리스트 marker
+- 사이드바 · 탭 · 리본 · 타이틀바 · 상태바 · 캔버스 · 그래프
+```
 
-만질 수 있는 영역 예시:
-- 헤딩 (h1~h6) 각각의 색·크기·굵기
-- 강조 (bold · italic · ==highlight==) 색
-- 링크 디테일 (hover · 밑줄 · 굵기 · 미해결 링크)
-- 코드 syntax (function · operator · property · string 등 11종)
-- 콜아웃 (info · tip · warning · error 등 14 타입별 색)
-- 표 (헤더 배경 · 교대 행 · 경계선)
-- 리스트 marker (bullet 색 · 들여쓰기 · 체크된 항목)
-- 사이드바 (파일 항목 색 · 선택된 항목 배경)
-- 탭 / 리본 / 타이틀바 / 상태바
-- 캔버스 / 그래프 색
+그 다음 `AskUserQuestion` 호출 (필수):
 
-1. 네, 만져볼게요 — 수정 모드로 진입
-0. 아니요, 지금 충분해요
-
-다음에 더 만지고 싶으면 언제든 /obsidian-theme → 수정 으로 호출하면 돼요.
+```
+question: "더 세밀하게 만져볼까요?"
+header: "디테일링"
+multiSelect: false
+options:
+  - label: "네, 수정 모드로"
+    description: "edit-flow.md 자동 진입 — 자연어 또는 카테고리 메뉴로 디테일링"
+  - label: "아니요, 지금 충분"
+    description: "끝. 나중에 /obsidian-theme → 수정 으로 언제든 호출"
 ```
 
 **사용자가 "1" 또는 "네" 선택 시**:

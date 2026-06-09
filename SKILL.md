@@ -52,17 +52,22 @@ cat "$VAULT/.obsidian/appearance.json" 2>/dev/null
 /* obsidian-theme: managed */
 ```
 
-사용자에게 질문:
+**입력 방식: `AskUserQuestion` 도구 사용 필수.**
 
 ```
-어떤 작업을 할까요?
-
-1. 스위치 — 만들어둔 테마들 중 하나로 갈아끼기
-2. 새로   — 자연어 묘사로 새 테마 만들기
-3. 수정   — 현재 테마의 일부를 자연어로 튜닝
+question: "어떤 작업을 할까요?"
+header: "모드"
+multiSelect: false
+options:
+  - label: "스위치"  (vault 에 테마 2개 이상이면 (추천) 표시)
+    description: "만들어둔 테마들 중 하나로 갈아끼기"
+  - label: "새로"  (이 스킬 만든 테마 0개면 (추천))
+    description: "자연어 묘사로 새 테마 만들기"
+  - label: "수정"  (이 스킬 만든 테마 1개 + 활성이면 (추천))
+    description: "현재 테마의 일부를 자연어로 튜닝"
 ```
 
-추천 모드 옆에 `(추천)` 표시. 사용자가 번호 또는 이름으로 답하면 해당 흐름 파일을 Read 하여 진입한다.
+사용자 선택에 따라 해당 흐름 파일을 Read 하여 진입한다.
 
 ## Step 2: 흐름 파일 Read 후 위임
 
@@ -82,6 +87,19 @@ cat "$VAULT/.obsidian/appearance.json" 2>/dev/null
 
 - `variables.md` — 옵시디언 CSS 변수 cheatsheet. 자연어 → 변수 매핑표 포함. 새로·수정 모드가 사용
 - `palettes.md` — 무드 → 4색 hex 카탈로그 (warm-cafe, retro-terminal, nordic-cold 등). 새로 모드가 사용
+
+## 사용자 입력 받는 방식 — 고정 옵션은 AskUserQuestion 도구 사용 (필수)
+
+> ⚠️ **고정 옵션 (2~4개) 을 묻는 모든 단계는 `AskUserQuestion` 도구를 사용한다.** 채팅에 "1/2/3 중 선택해주세요" 라고 텍스트로 묻지 말 것. Claude Code 의 선택 UI 가 떠야 사용자가 화살표·체크로 깔끔하게 선택 가능.
+
+| 입력 유형 | 도구 |
+|---|---|
+| **고정 옵션 2~4개** (예: 모드 분기 / 라이트·다크·둘다 / Y·n) | `AskUserQuestion` |
+| **고정 옵션 5개 이상** (예: vault 의 테마 7개 중 선택) | 채팅 텍스트 (옵션 한도 초과) |
+| **자유 입력** (예: "어떤 느낌?", "어디를 어떻게 바꿀까") | 채팅 텍스트 |
+| **자유 입력 + 카탈로그 선택 혼합** (예: 팔레트 1/2/3 또는 "1번 베이스 + 액센트 조정") | `AskUserQuestion` + "Other" 옵션 활용 |
+
+각 흐름 파일 (create-flow / edit-flow / switch-flow) 의 사용자 입력 단계마다 어떤 도구를 쓸지 명시되어 있다. 따른다.
 
 ## 주의사항
 
